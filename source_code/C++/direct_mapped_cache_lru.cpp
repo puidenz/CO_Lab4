@@ -10,7 +10,6 @@ struct cache_content
 	bool v;				//verify bit
 	unsigned int tag;
 	unsigned int time;	//time stamp for last use
-	// unsigned int	data[16];
 };
 
 const int K = 1024;
@@ -37,7 +36,7 @@ double simulate(int cache_size, int block_size, int set_size)
 	for (int i = 0; i < set_n; i++){
 		cache[i] = new cache_content[set_size];
 	}
-	//cout << "cache line: " << line << endl;
+
 
 	for (int i = 0; i < set_n; i++)				//instart, every line is empty
 	for (int j = 0; j < set_size; j++)
@@ -47,8 +46,8 @@ double simulate(int cache_size, int block_size, int set_size)
 
 	while (fscanf(fp, "%x", &x) != EOF)
 	{
-		count++;
-		//cout << hex << x << " ";	//hexadecimal base
+		count++;								//add time stamp
+
 		index = (x >> offset_bit) & (set_n - 1);		//filter the index bits
 		tag = x >> (index_bit + offset_bit);			//filter the tag bits
 		set = index;
@@ -57,6 +56,7 @@ double simulate(int cache_size, int block_size, int set_size)
 		for (int i = 0; i < set_size; i++){
 			if (cache[set][i].v && cache[set][i].tag == tag){
 				hit_flag = true;				//hit
+				cache[set][i].time = count;
 			}
 		}
 
@@ -84,27 +84,14 @@ double simulate(int cache_size, int block_size, int set_size)
 				cache[set][LRU].time = count;
 			}
 		}
-		/*if (set_size == 8)
-			cout << endl << count << endl;*/
-		/*if (cache[index].v && cache[index].tag == tag){
-		cache[index].v = true;    // hit
-		}
-		else{
-		miss++;
-		cache[index].v = true;  // miss, update block
-		cache[index].tag = tag;
-		}*/
+
 	}
 	fclose(fp);
 
-	
-	for (int i = 0; i < set_n; i++){
-		/*if (set_size == 8)
-			cout << "set_size" << set_size << " " << i << " ";*/
+
+	for (int i = 0; i < set_n; i++)
 		delete[] cache[i];
-		
-	}
-		
+
 	delete[] cache;
 	return (double)miss / (double)count;
 }
