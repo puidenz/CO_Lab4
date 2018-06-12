@@ -29,7 +29,7 @@ double simulate(int cache_size, int block_size, int set_size)
 
 
 	int offset_bit = (int)log2(block_size);		//2^(offset_bit) bytes in one block
-	int index_bit = (int)log2(cache_size / block_size);
+	int index_bit = (int)log2((cache_size / block_size) / set_size);
 	int line = cache_size >> (offset_bit);		// cache/2^(offset_bit) is "number of block"
 	int set_n = line / set_size;				//how many sets in cache
 
@@ -49,9 +49,9 @@ double simulate(int cache_size, int block_size, int set_size)
 	{
 		count++;
 		//cout << hex << x << " ";	//hexadecimal base
-		index = (x >> offset_bit) & (line - 1);	//filter the index bits
-		tag = x >> (index_bit + offset_bit);	//filter the tag bits
-		set = index % set_n;
+		index = (x >> offset_bit) & (set_n - 1);		//filter the index bits
+		tag = x >> (index_bit + offset_bit);			//filter the tag bits
+		set = index;
 
 		bool hit_flag = false, empty = false;
 		for (int i = 0; i < set_size; i++){
@@ -65,7 +65,7 @@ double simulate(int cache_size, int block_size, int set_size)
 			for (int i = 0; i < set_size; i++){
 				if (cache[set][i].v == false){
 					empty = true;				//some idle space for new data
-					cache[set][i].v == true;
+					cache[set][i].v = true;
 					cache[set][i].tag = tag;
 					cache[set][i].time = count;
 				}
@@ -84,7 +84,8 @@ double simulate(int cache_size, int block_size, int set_size)
 				cache[set][LRU].time = count;
 			}
 		}
-
+		/*if (set_size == 8)
+			cout << endl << count << endl;*/
 		/*if (cache[index].v && cache[index].tag == tag){
 		cache[index].v = true;    // hit
 		}
@@ -96,8 +97,14 @@ double simulate(int cache_size, int block_size, int set_size)
 	}
 	fclose(fp);
 
-	for (int i = 0; i < set_size; i++)
+	
+	for (int i = 0; i < set_n; i++){
+		/*if (set_size == 8)
+			cout << "set_size" << set_size << " " << i << " ";*/
 		delete[] cache[i];
+		
+	}
+		
 	delete[] cache;
 	return (double)miss / (double)count;
 }
