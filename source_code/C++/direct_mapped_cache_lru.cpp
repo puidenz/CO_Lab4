@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <limits>
+#include <string>
 
 using namespace std;
 
@@ -21,7 +22,7 @@ double log2(double n)
 }
 
 
-double simulate(int cache_size, int block_size, int set_size)
+double simulate(int cache_size, int block_size, int set_size,const char *filename)
 {
 	unsigned int tag, index, set, x;
 	unsigned int count = 0, miss = 0;
@@ -42,7 +43,7 @@ double simulate(int cache_size, int block_size, int set_size)
 	for (int j = 0; j < set_size; j++)
 		cache[i][j].v = false;
 
-	FILE *fp = fopen("LU.txt", "r");			// read file
+	FILE *fp = fopen(filename, "r");			// read file
 
 	while (fscanf(fp, "%x", &x) != EOF)
 	{
@@ -95,17 +96,29 @@ double simulate(int cache_size, int block_size, int set_size)
 	delete[] cache;
 	return (double)miss / (double)count;
 }
-
-int main()
+void printfile(const char *filename)
 {
-	for (unsigned int n = 1; n <= 8; n = n << 1){
-		cout << n << "-way:" << endl;
-		for (unsigned int i = 1; i <= 32; i = i << 1){
-			cout << "cache size: " << i << " ";
-			cout << "miss rate" << simulate(i * K, 64, n) << endl;
+    FILE *fp2 = fopen("output.txt", "a+");  //write?
+    printf("File %s processing...\n",filename);
+    fprintf(fp2,"File %s processing...\n",filename);
+    for (unsigned int i = 1; i <= 32; i = i << 1){
+		//cout << i << "-way:" << endl;
+        printf("cache size: %2dK\n",i);
+        for (unsigned int n = 1; n <= 8; n = n << 1){
+            printf("%2d-way, ",n);
+			//cout << "cache size: " << i << " ";
+			float result = simulate(i * K, 64, n,filename) * 100;
+			printf("miss rate: %f%%\n", result);
+			fprintf(fp2,"%d %f\n",n, result);
+			//cout << "miss rate" << simulate(i * K, 64, n) << endl;
 		}
 		cout << endl;
 	}
-	system("pause");
+}
+
+int main()
+{
+    printfile("LU.txt");
+    printfile("RADIX.txt");
 	return 0;
 }
