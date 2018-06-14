@@ -89,7 +89,7 @@ double simulate(int cache_size, int block_size, int set_size,const char *filenam
 	}
 	fclose(fp);
 
-
+        printf("size = %5d bits, ",(32 - index_bit - offset_bit+1)*set_size*set_n);
 	for (int i = 0; i < set_n; i++)
 		delete[] cache[i];
 
@@ -108,7 +108,7 @@ void printfile(const char *filename)
             printf("%2d-way, ",n);
 			//cout << "cache size: " << i << " ";
 			float result = simulate(i * K, 64, n,filename) * 100;
-			printf("miss rate: %f%%\n", result);
+			printf("miss rate: %2.6f%%\n", result);
 			fprintf(fp2,"%d %f\n",n, result);
 			//cout << "miss rate" << simulate(i * K, 64, n) << endl;
 		}
